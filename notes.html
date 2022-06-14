@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Zhengbo Zhou" />
+  <title>Jacobi Algorithm and MATLAB implementation</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    div.abstract {
+      margin: 2em 2em 2em 2em;
+      text-align: left;
+      font-size: 85%;
+    }
+    div.abstract-title {
+      font-weight: bold;
+      text-align: center;
+      padding: 0;
+      margin-bottom: 0.5em;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    span.underline{text-decoration: underline;}
+    div.column{display: inline-block; vertical-align: top; width: 50%;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+  </style>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Jacobi Algorithm and MATLAB implementation</h1>
+<p class="author">Zhengbo Zhou</p>
+<div class="abstract">
+<div class="abstract-title">Abstract</div>
+<p>Suppose <span class="math inline">\(A\in\mathbf{R}^{n\times
+n}\)</span> is a symmetric matrix, this note will provide a theoretical
+background of the <em>Jacobi algorithm</em> on <span
+class="math inline">\(A\)</span> and the MATLAB implementation of the
+method.</p>
+</div>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#sec:1" id="toc-sec:1">Givens Rotation</a></li>
+<li><a href="#sec:2" id="toc-sec:2">Jacobi Algorithm</a>
+<ul>
+<li><a href="#idea-behind-the-jacobi-algorithm"
+id="toc-idea-behind-the-jacobi-algorithm">Idea behind the Jacobi
+algorithm</a></li>
+<li><a href="#how-jacobi-algorithm-works"
+id="toc-how-jacobi-algorithm-works">How Jacobi algorithm works?</a></li>
+<li><a href="#sec:2.3" id="toc-sec:2.3">Choice of Givens rotation
+matrix</a></li>
+<li><a href="#matlab-implementation-of-the-choice"
+id="toc-matlab-implementation-of-the-choice">MATLAB implementation of
+the choice</a>
+<ul>
+<li><a href="#testing" id="toc-testing">Testing</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#sec:3" id="toc-sec:3">Choices of index pair</a>
+<ul>
+<li><a href="#the-classical-jacobi-algorithm"
+id="toc-the-classical-jacobi-algorithm">The classical Jacobi
+algorithm</a>
+<ul>
+<li><a href="#matlab-implementation"
+id="toc-matlab-implementation">MATLAB implementation</a></li>
+<li><a href="#testing-1" id="toc-testing-1">Testing</a></li>
+</ul></li>
+<li><a href="#the-cyclic-by-row-algorithm"
+id="toc-the-cyclic-by-row-algorithm">The Cyclic-by-Row algorithm</a>
+<ul>
+<li><a href="#matlab-implementation-1"
+id="toc-matlab-implementation-1">MATLAB implementation</a></li>
+<li><a href="#testing-2" id="toc-testing-2">Testing</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+<p><span><span class="smallcaps"><strong></strong></span></span></p>
+<p><span><strong></strong></span> <span><em></em></span></p>
+<h1 id="sec:1">Givens Rotation</h1>
+<div class="definition">
+<p><strong>Definition 1</strong> (Givens rotation). Givens rotation has
+the form <span class="math display">\[G(i, k, \theta)=
+        \begin{blockarray}{cccccccc}
+        \begin{block}{[ccccccc]c}
+            1 &amp; \cdots &amp; 0 &amp; \cdots &amp; 0 &amp; \cdots
+&amp; 0 &amp;  \\
+            \vdots &amp; \ddots &amp; \vdots &amp; &amp; \vdots &amp;
+&amp; \vdots&amp; \\
+            0 &amp; \cdots &amp; c &amp; \cdots &amp; s &amp; \cdots
+&amp; 0 &amp; i\\
+            \vdots &amp; &amp; \vdots &amp; \ddots &amp; \vdots &amp;
+&amp; \vdots &amp;  \\
+            0 &amp; \cdots &amp; -s &amp; \cdots &amp; c &amp; \cdots
+&amp; 0 &amp; k\\
+            \vdots &amp; &amp; \vdots &amp; &amp; \vdots &amp; \ddots
+&amp; \vdots &amp; \\
+            0 &amp; \cdots &amp; 0 &amp; \cdots &amp; 0 &amp; \cdots
+&amp; 1 &amp; \\
+        \end{block}
+         &amp;  &amp; i &amp;  &amp; k &amp;  &amp;  \\
+        \end{blockarray}\]</span></p>
+</div>
+<p>where <span class="math inline">\(c = \cos(\theta)\)</span> and <span
+class="math inline">\(s = \sin(\theta)\)</span> for some <span
+class="math inline">\(\theta\)</span>.</p>
+<div class="proposition">
+<p><strong>Proposition 2</strong>. <em>Givens rotations are
+orthogonal</em></p>
+</div>
+<div class="proof">
+<p><em>Proof.</em> Let <span class="math inline">\(G =
+G(i,k,\theta)\)</span> be a Givens rotation. By using the trigonometric
+identity <span class="math inline">\(\cos^2(\theta) + \sin^2(\theta) =
+1\)</span>, we have the following <span
+class="math display">\[\label{eq:1.2}
+        G_{ik}=G([i,k],[i,k]) =
+        \begin{bmatrix}
+            c &amp; s \\
+            -s &amp; c
+        \end{bmatrix}
+        \quad \to \quad
+        G_{ik}^\top G_{ik} =
+        \begin{bmatrix}
+            1 &amp; 0 \\
+            0 &amp; 1
+        \end{bmatrix}
+        = G_{ik}G_{ik}^\top\]</span> We could calculate the following
+matrix products <span class="math inline">\(G^\top G\)</span> and <span
+class="math inline">\(GG^\top\)</span> using  <a href="#eq:1.2"
+data-reference-type="eqref" data-reference="eq:1.2">[eq:1.2]</a>. <span
+class="math display">\[G^\top G = GG^\top= I\]</span> Hence <span
+class="math inline">\(G\)</span> is orthogonal. ◻</p>
+</div>
+<p>Notice that the matrix <span
+class="math inline">\(G(p,q,\theta)\)</span> can be written as <span
+class="math display">\[\label{eq:1.4}
+    \begin{aligned}
+        G(p,q,\theta) =
+[e_1,\dots,e_{p-1},e_{pq},e_{p+1},\dots,e_{q-1},e_{qp},e_{q+1},\dots,e_{n}]
+    \end{aligned}\]</span> where <span
+class="math inline">\(e_i\)</span> is the <span
+class="math inline">\(i\)</span>th column of the <span
+class="math inline">\(n\times n\)</span> identity matrix, where <span
+class="math inline">\(i\neq p,q\)</span>, and <span
+class="math inline">\(e_{pq}\)</span> and <span
+class="math inline">\(e_{qp}\)</span> are defined as <span
+class="math display">\[\label{eq:1.5}
+    [e_{pq}]_k = \begin{cases}
+        c &amp; \text{if }k = p \\
+        -s &amp; \text{if }k = q\\
+        0 &amp; \text{if }k \neq p,q
+    \end{cases}, \quad
+    [e_{qp}]_k = \begin{cases}
+        s &amp; \text{if }k = q \\
+        c &amp; \text{if }k = p\\
+        0 &amp; \text{if }k \neq p,q
+    \end{cases}.\]</span></p>
+<div id="prop:1.3" class="proposition">
+<p><strong>Proposition 3</strong>. <em>Suppose <span
+class="math inline">\(A\in \mathbf{R}^{n\times n}\)</span>, and <span
+class="math inline">\(G(p,q,\theta)\)</span> is a Givens rotation. If we
+define <span class="math inline">\(B\)</span> as <span
+class="math display">\[B = G(p,q,\theta)^\top AG(p,q,\theta),\]</span>
+then <span class="math inline">\(B\)</span> and <span
+class="math inline">\(A\)</span> are the same except in rows and columns
+<span class="math inline">\(p\)</span> and <span
+class="math inline">\(q\)</span>.</em></p>
+</div>
+<div class="proof">
+<p><em>Proof.</em> Using the notations in  <a href="#eq:1.4"
+data-reference-type="eqref" data-reference="eq:1.4">[eq:1.4]</a> and  <a
+href="#eq:1.5" data-reference-type="eqref"
+data-reference="eq:1.5">[eq:1.5]</a>, we could rewrite <span
+class="math inline">\(B\)</span> as <span
+class="math display">\[\begin{aligned}
+            B =
+            \begin{bmatrix}
+                e_{1}^\top A e_{1} &amp; \cdots &amp; e_{1}^\top A e_{p
+q} &amp; \cdots &amp; e_{1}^\top A e_{q p}  &amp;\cdots &amp; e_{1}^\top
+A e_{n} \\
+                \vdots &amp;  &amp; \vdots &amp;  &amp;
+\vdots  &amp;  &amp; \vdots \\
+                e_{pq}^\top A e_{1} &amp; \cdots &amp; e_{pq}^\top A
+e_{p q} &amp; \cdots &amp; e_{pq}^\top A e_{q p}  &amp;\cdots &amp;
+e_{pq}^\top A e_{n} \\
+                \vdots &amp;  &amp; \vdots &amp;  &amp;
+\vdots  &amp;  &amp; \vdots \\
+                e_{qp}^\top A e_{1} &amp; \cdots &amp; e_{qp}^\top A
+e_{p q} &amp; \cdots &amp; e_{qp}^\top A e_{q p}  &amp;\cdots &amp;
+e_{qp}^\top A e_{n} \\
+                \vdots &amp;  &amp; \vdots &amp;  &amp;
+\vdots  &amp;  &amp; \vdots \\
+                e_{n}^\top A e_{1} &amp; \cdots &amp; e_{n}^\top A e_{p
+q} &amp; \cdots &amp; e_{n}^\top A e_{q p}  &amp;\cdots &amp; e_{n}^\top
+A e_{n} \\
+            \end{bmatrix}
+        \end{aligned}\]</span> Hence <span class="math inline">\(B_{ij}
+= e_i^\top Ae_j = A_{ij}\)</span> if <span class="math inline">\(i,j
+\neq p,q\)</span>, and for <span class="math inline">\(i,j = p\)</span>
+or <span class="math inline">\(q\)</span>, <span
+class="math inline">\(B_{ij}\neq A_{ij}\)</span> in general. ◻</p>
+</div>
+<h1 id="sec:2">Jacobi Algorithm</h1>
+<h2 id="idea-behind-the-jacobi-algorithm">Idea behind the Jacobi
+algorithm</h2>
+<p>Given a symmetric matrix <span class="math inline">\(A\in
+\mathbf{R}^{n\times n}\)</span>, the idea of Jacobi algorithm is to use
+<span class="math inline">\(Q^\top AQ\)</span> to replace <span
+class="math inline">\(A\)</span>, where <span
+class="math inline">\(Q\)</span> is orthogonal. The resulting matrix
+will have the same eigenvalue as <span class="math inline">\(A\)</span>.
+We would like to have the property that after each step of replacement,
+the new matrix have “smaller” off-diagonal entries than the old one to
+make the new matrix “more diagonal”. To do this, we use the Givens
+rotation matrix defined in Section <a href="#sec:1"
+data-reference-type="ref" data-reference="sec:1">1</a>.</p>
+<div class="definition">
+<p><strong>Definition 4</strong> (<span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}\)</span> operator).
+We could define the quantity <span
+class="math display">\[\mathop{\mathrm{\mathsf{off}}}(A) \coloneqq
+\sqrt{\|A\|^2_F - \sum_{i=1}^n a^2_{ii}} = \sqrt{\sum_{i=1}^n
+\sum_{\substack{\text{$j=1$}\\\text{$j\neq i$}}}^n a^2_{ij}}\]</span>
+which is the Frobenius norm of the off-diagonal elements.</p>
+</div>
+<p>The aim of Jacobi algorithm on <span class="math inline">\(A\)</span>
+is to reduce the quantity <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(A)\)</span>, and
+this could be done in 3 steps.</p>
+<ol>
+<li><p>Choose a pair index <span class="math inline">\((p,q)\)</span>.We
+could assume that <span class="math inline">\(1\leq p &lt; q\leq
+n\)</span>.</p></li>
+<li><p>Apply <span class="math inline">\(G(p,q)\)</span> on matrix <span
+class="math inline">\(A\)</span> in the way of <span
+class="math inline">\(G(p,q)^\top AG(p,q)\)</span>.</p></li>
+<li><p>Overwrite <span class="math inline">\(A\)</span> with <span
+class="math inline">\(B = G(p,q)^\top AG(p,q)\)</span>.</p></li>
+</ol>
+<p>Step (1) will be discussed the Section <a href="#sec:3"
+data-reference-type="ref" data-reference="sec:3">3</a>, the rest of the
+section will focused on step (2) and step (3) is automatic.</p>
+<h2 id="how-jacobi-algorithm-works">How Jacobi algorithm works?</h2>
+<p>Step (2) and step (3) is equivalent to consider the equation <span
+class="math display">\[\label{eq:2.2}
+    \begin{aligned}
+        \begin{bmatrix}
+            b_{pp} &amp; b_{pq} \\ b_{qp} &amp; b_{qq}
+        \end{bmatrix} &amp;=
+        \begin{bmatrix}
+            c &amp; s \\ -s &amp; c
+        \end{bmatrix}^\top
+        \begin{bmatrix}
+            a_{pp} &amp; a_{pq} \\ a_{qp} &amp; a_{qq}
+        \end{bmatrix}
+        \begin{bmatrix}
+            c &amp; s \\ -s &amp; c
+        \end{bmatrix}\\
+        &amp; =
+        \begin{bmatrix}
+            c^2a_{pp} - cs a_{qp} - cs a_{pq} + s^2a_{qq} &amp;
+            cs a_{pp} - s^2 a_{qp} + c^2 a_{pq} - csa_{qq}\\
+            c^2a_{pq} + csa_{pp} - csa_{qq} - s^2 a_{pq} &amp;
+            csa_{qp} + s^2 a_{pp} + c^2 a_{qq} + csa_{pq}
+        \end{bmatrix}
+    \end{aligned}\]</span></p>
+<p>Since <span class="math inline">\(A\)</span> is symmetric, we have
+<span class="math inline">\(a_{pq} = a_{qp}\)</span>. Using this we
+could further simplify  <a href="#eq:2.2" data-reference-type="eqref"
+data-reference="eq:2.2">[eq:2.2]</a> <span
+class="math display">\[\label{eq:2.3}
+    \begin{bmatrix}
+        b_{pp} &amp; b_{pq} \\ b_{qp} &amp; b_{qq}
+    \end{bmatrix} =
+    \begin{bmatrix}
+        c^2 a_{pp} + s^2 a_{qq} -2csa_{pq} &amp; cs(a_{pp} - a_{qq}) +
+(c^2 -s^2)a_{pq}\\
+        cs(a_{pp}-a_{qq}) + (c^2 -s^2)a_{pq} &amp; s^2 a_{pp} +
+c^2a_{qq} + 2csa_{pq}
+    \end{bmatrix}\]</span> To diagonalized the matrix in  <a
+href="#eq:2.3" data-reference-type="eqref"
+data-reference="eq:2.3">[eq:2.3]</a>, we are setting <span
+class="math inline">\(b_{pq} = b_{qp} = 0\)</span>, and this is
+equivalent to <span class="math display">\[\label{eq:2.4}
+    cs(a_{pp}-a_{qq}) + (c^2 -s^2)a_{pq} = 0.\]</span></p>
+<div class="theorem">
+<p><strong>Theorem 5</strong>. <em>Frobenius norm is unitarily invariant
+norm. Namely, if <span class="math inline">\(A\in \mathbf{R}^{n\times
+n}\)</span> and <span class="math inline">\(Q,V\in\mathbf{R}^{n\times
+n}\)</span> is orthogonal (if in <span
+class="math inline">\(\mathbf{C}^{n\times n}\)</span>, this will be
+unitary), then <span class="math display">\[\|A\|_F = \|Q^\top
+AV\|_F\]</span></em></p>
+</div>
+<div class="proof">
+<p><em>Proof.</em> <span class="math display">\[\|Q^\top A V\|_F^2 =
+\mathop{\mathrm{Tr}}(Q^\top AVV^\top A^\top Q) =
+\mathop{\mathrm{Tr}}(Q^\top AA^\top Q) = \mathop{\mathrm{Tr}}(AA^\top) =
+\|A\|_F^2\]</span> ◻</p>
+</div>
+<p>Hence, if we take the Frobenius norm on both sides of  <a
+href="#eq:2.2" data-reference-type="eqref"
+data-reference="eq:2.2">[eq:2.2]</a>, we have the equality</p>
+<p><span class="math display">\[b_{pp}^2 + b_{qq}^2 = a_{pp}^2 +
+a_{qq}^2 + 2a_{pq}^2\]</span></p>
+<p>If we look at the quantity <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(B)\)</span>, we
+have <span class="math display">\[\label{eq:2.5}
+    \begin{aligned}
+        \mathop{\mathrm{\mathsf{off}}}(B)^2 &amp;= \|B\|_F^2 -
+\sum_{i=1}^n b^2_{ii} = \|A\|_F^2 - \sum_{\substack{i=1\\i\neq
+p,q}}(b^2_{ii}) - (b^2_{pp} + b^2_{qq})\\
+        &amp; = \|A\|_F^2 - \sum^n_{\substack{i=1\\i\neq p,q}}(b^2_{ii})
+- a_{pp}^2 - a_{qq}^2 - 2a_{pq}^2 \\
+        &amp; = \|A\|_F^2 - \sum^n_{\substack{i=1\\i\neq p,q}}(a^2_{ii})
+- a_{pp}^2 - a_{qq}^2 - 2a_{pq}^2 \quad \text{By
+Proposition~\ref{prop:1.3}}\\
+        &amp; = \|A\|_F^2 - \sum_{i=1}^n(a^2_{ii}) - 2a_{pq}^2 =
+\mathop{\mathrm{\mathsf{off}}}(A)^2 -2a_{pq}^2
+    \end{aligned}\]</span></p>
+<p>Therefore we derived that <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(B)^2 =
+\mathop{\mathrm{\mathsf{off}}}(A)^2 - 2a^2_{pq}\)</span>, which implies
+that the new matrix <span class="math inline">\(B\)</span> is “more
+diagonal” than the matrix <span class="math inline">\(A\)</span>. Hence
+we have proved that step(2) and step(3) will indeed make <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(A)\)</span> smaller
+after applying <span class="math inline">\(Q^\top AQ\)</span> to <span
+class="math inline">\(A\)</span>.</p>
+<h2 id="sec:2.3">Choice of Givens rotation matrix</h2>
+<p>Notice that, we need a way to choose <span
+class="math inline">\(c\)</span> and <span
+class="math inline">\(s\)</span> in the Givens rotation matrix. First,
+if <span class="math inline">\(a_{pq}=0\)</span>, there is no need to do
+further work since <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(B) =
+\mathop{\mathrm{\mathsf{off}}}(A)\)</span> and we could then choose
+<span class="math inline">\(c = 1\)</span> and <span
+class="math inline">\(s = 0\)</span>. Otherwise, we look at the  <a
+href="#eq:2.4" data-reference-type="eqref"
+data-reference="eq:2.4">[eq:2.4]</a> <span
+class="math display">\[cs(a_{pp}-a_{qq}) + (c^2 -s^2)a_{pq} = 0.
+\tag{2.4}\]</span> Notice that <span class="math inline">\(c =
+\cos(\theta)\)</span> and <span class="math inline">\(s =
+\sin(\theta)\)</span>, we have <span class="math display">\[\label{2.9}
+    \cot(2\theta) = \frac{\cos^2(\theta) -
+\sin^2(\theta)}{2\cos(\theta)\sin(\theta)} = \frac{c^2 - s^2 }{2cs} =
+\frac{a_{qq}-a_{pp}}{2a_{pq}} =:\tau\]</span> By define <span
+class="math inline">\(t = s/c\)</span> (<span class="math inline">\(t =
+\tan(\theta)\)</span>), we have transformed  <a href="#eq:2.4"
+data-reference-type="eqref" data-reference="eq:2.4">[eq:2.4]</a> into
+<span class="math display">\[\label{eq:2.10}
+    t^2 + 2\tau t - 1 = 0.\]</span></p>
+<p>This could be solved, and we would like to choose the root where
+<span class="math inline">\(t\)</span> has the smaller magnitude. <span
+class="math display">\[t_{1,2} = -\tau \pm \sqrt{\tau^2 + 1}\quad \to
+\quad t_{\mathrm{min}} =
+    \begin{cases}
+        -\tau + \sqrt{\tau^2 + 1} &amp; \text{if }\tau\geq 0 \\
+        -\tau - \sqrt{\tau^2 + 1} &amp; \text{if }\tau &lt; 0
+    \end{cases}\]</span></p>
+<p>Use the fact that <span class="math inline">\(s^2 + c^2 = 1\)</span>
+and <span class="math inline">\(t_{\mathrm{min}} = s/c\)</span>, we
+could define <span class="math inline">\(c\)</span> and <span
+class="math inline">\(s\)</span> by <span
+class="math display">\[\label{eq:2.12}
+    s = ct_{\mathrm{min}},\quad c =
+\frac{1}{\sqrt{1+t_{\mathrm{min}}^2}}.\]</span></p>
+<p>Here we choose the smaller roots (in magnitude) of t, so that we
+ensure that <span class="math inline">\(\max(t_{\mathrm{min}}) =
+1\)</span> (shown in Fig. <a href="#fig:1" data-reference-type="ref"
+data-reference="fig:1">1</a>), hence the angle of rotation could be
+bounded <span class="math inline">\(|\theta|\leq \pi/4\)</span>.</p>
+<figure>
+<embed src="figs/tmin.pdf" id="fig:1" style="width:50.0%" />
+<figcaption aria-hidden="true">The graph shows the solution <span
+class="math inline">\(t_{\mathrm{min}}\)</span> of  <a href="#eq:2.10"
+data-reference-type="eqref" data-reference="eq:2.10">[eq:2.10]</a>
+against <span class="math inline">\(\tau\)</span>.</figcaption>
+</figure>
+<p>The choice of this <span class="math inline">\(t_{\min}\)</span> will
+also minimize the norm <span
+class="math inline">\(\|B-A\|_F\)</span>.</p>
+<p><span class="math display">\[\begin{aligned}
+        \|B-A\|_F^2 &amp;=
+\mathop{\mathrm{Tr}}\left((B-A)(B-A)^\top\right) \\
+        &amp;= \sum_{i=1}^n \left\{  (e_{pq}^\top Ae_i - a_{pi})^2 +
+(e_{qp}^\top A e_i - a_{qi})^2  \right\} \\
+        &amp; = \sum_{\substack{i=1\\i\neq p,q}}^n \left\{  (e_{pq}^\top
+Ae_i - a_{pi})^2 + (e_{qp}^\top A e_i - a_{qi})^2  \right\} \\
+&amp;\quad \quad \quad + \sum_{i=p,q}\left\{  (e_{pq}^\top Ae_i -
+a_{pi})^2 + (e_{qp}^\top A e_i - a_{qi})^2  \right\}
+    \end{aligned}\]</span></p>
+<p>First evaluate the second summation, in <span class="citation"
+data-cites="parlett1980symmetric"></span>, it shown that the resulting
+<span class="math inline">\(B\)</span> has entries <span
+class="math display">\[\begin{bmatrix}
+        b_{pp} &amp; b_{pq} \\ b_{qp} &amp; b_{qq}
+    \end{bmatrix} =
+    \begin{bmatrix}
+        a_{pp} - a_{pq}t_{\min} &amp; 0 \\
+        0 &amp; a_{qq} + a_{pq}t_{\min}
+    \end{bmatrix}\]</span></p>
+<p>Hence the second sum can be easily computed gives <span
+class="math inline">\(\mathrm{Sum}_2 = 2a_{pq}^2 (t_{\min}^2 +
+1)\)</span> and using  <a href="#eq:2.12" data-reference-type="eqref"
+data-reference="eq:2.12">[eq:2.12]</a> we have <span
+class="math inline">\(\mathrm{Sum}_2 = 2a_{pq}^2/c^2\)</span>. Remain to
+evaluate the first sum, which gives <span
+class="math display">\[\begin{aligned}
+        \sum^n_{\substack{i=1\\i\neq p,q}} \left((c-1) a_{pi} -
+sa_{qi}\right)^2 + \left((c-1) a_{qi} + sa_{pi}\right)^2
+    \end{aligned}\]</span> with some algebraic manipulation, we have
+<span class="math display">\[\label{eq:2.16}
+    \|B-A\|_F^2 = 2(1-c)\sum^n_{\substack{i=1\\i\neq p,q}}(a_{ip}^2 +
+a_{iq}^2) + 2a^2_{pq}/c^2\]</span> The minimum <span
+class="math inline">\(t\)</span> will gives maximum <span
+class="math inline">\(c\)</span>, and this will minimize the  <a
+href="#eq:2.16" data-reference-type="eqref"
+data-reference="eq:2.16">[eq:2.16]</a>.</p>
+<h2 id="matlab-implementation-of-the-choice">MATLAB implementation of
+the choice</h2>
+<p>Section <a href="#sec:2.3" data-reference-type="ref"
+data-reference="sec:2.3">2.3</a> can be summarized into the following
+algorithm.</p>
+<div class="algorithm">
+<div class="algorithmic">
+<p><strong>Function</strong> <span class="math inline">\([c,s] =
+\texttt{jacobi\_pair}(A,p,q)\)</span> <span
+class="math inline">\(c=1,s=0\)</span> <span class="math inline">\(\tau
+= (a_{qq} - a_{pp})/2a_{pq}\)</span> <span class="math inline">\(t=-\tau
++ \sqrt{\tau^2 +1}\)</span> <span class="math inline">\(t = -\tau -
+\sqrt{\tau^2 +1}\)</span> <span class="math inline">\(c =
+1/\sqrt{1+t^2}, s = ct\)</span></p>
+</div>
+</div>
+<p>This can be implement using MATLAB </p>
+<pre><code>function [c,s] = jacobi_pair(A,p,q)
+if p == q % a test on whether p at least not equal to q
+    error(&#39;p and q should have different value&#39;)
+end
+if A(p,q) == 0 % case 1
+    c = 1; s = 0;
+else % case 2: A(p,q) ~= 0
+    tau = (A(q,q) - A(p,p))/(2*A(p,q));
+    if tau &gt;= 0
+        t = -tau + sqrt(tau*tau + 1);
+    else
+        t = -tau - sqrt(tau*tau + 1);
+    end
+    c = 1/sqrt(1+t*t); s = c*t;
+end</code></pre>
+<h3 id="testing">Testing</h3>
+<p>We could test the function by using a symmetric matrix <span
+class="math inline">\(A\in \mathbf{R}^{4\times 4}\)</span>,</p>
+<pre><code>n = 4;
+A = randn(n); A = A + A&#39;; % generate symmetric matrix A
+pq = [3,1]; % choose a pair of index
+[c,s] = jacobi_pair(A,pq(1),pq(2)); % generate a pair (c,s)
+% construct the desire givens rotation matrix
+G = eye(n); G([pq(1),pq(2)],[pq(1),pq(2)]) = [c,s;-s,c];
+B = G&#39;*A*G % get the resulting matrix B and output</code></pre>
+<p>Since we choose the pair to be <span
+class="math inline">\((3,1)\)</span>, hence we should expect the new
+matrix <span class="math inline">\(B\)</span> have <span
+class="math inline">\(0\)</span>s at both entries <span
+class="math inline">\(b_{31}\)</span> and <span
+class="math inline">\(b_{13}\)</span>.</p>
+<pre><code>B =
+-2.1035    0.4036   -0.0000   -2.8641
+0.4036   -1.5038    1.5784   -1.0147
+-0.0000    1.5784    2.6288   -1.2435
+-2.8641   -1.0147   -1.2435   -0.1098</code></pre>
+<p>Entries <code>B(3,1)</code> and <code>B(1,3)</code> are <span
+class="math inline">\(-2.2204e-16\)</span> and <span
+class="math inline">\(-1.1102e-16\)</span>. They are small enough for
+the computer to consider that these are zeros.</p>
+<h1 id="sec:3">Choices of index pair</h1>
+<p>In this section, we will answer the question that arises before:</p>
+<div class="center">
+
+</div>
+<h2 id="the-classical-jacobi-algorithm">The classical Jacobi
+algorithm</h2>
+<p>From  <a href="#eq:2.5" data-reference-type="eqref"
+data-reference="eq:2.5">[eq:2.5]</a>, we know that <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(B)^2 =
+\mathop{\mathrm{\mathsf{off}}}(A)^2 - 2a_{pq}^2\)</span>, hence it is
+natural to consider the choice <span
+class="math inline">\((p,q)\)</span> such that <span
+class="math inline">\(a_{pq}^2\)</span> is maximal. This choice will
+give the <em>classical Jacobi algorithm</em>.</p>
+<div class="algorithm">
+<div class="algorithmic">
+<p><strong>Function</strong> <span class="math inline">\([V,A]
+=\)</span><code>jacobi_classical</code><span
+class="math inline">\((A,tol)\)</span> <span class="math inline">\(V =
+I_n, \delta = tol \cdot \|A\|_F\)</span> Choose <span
+class="math inline">\((p,q)\)</span> so that <span
+class="math inline">\(|a_{pq}| = \max_{i\neq j}|a_{ij}|\)</span> <span
+class="math inline">\([c,s] =\)</span><code>jacobi_pair</code><span
+class="math inline">\((A,p,q)\)</span> Construct Givens rotation matrix
+<span class="math inline">\(G\)</span> based on <span
+class="math inline">\((c,s)\)</span> Update <span
+class="math inline">\(G^\top A G \to A\)</span> Update <span
+class="math inline">\(VG \to V\)</span></p>
+</div>
+</div>
+<p>Notice that since <span class="math inline">\(|a_{pq}|\)</span> is
+chosen to be the largest off-diagonal element, hence we have the
+inequality <span class="math display">\[\label{eq:3.1}
+    \mathop{\mathrm{\mathsf{off}}}(A)^2 \leq N\cdot(2a_{pq}^2),\quad N =
+\frac{n(n-1)}{2}\]</span> Using  <a href="#eq:2.5"
+data-reference-type="eqref" data-reference="eq:2.5">[eq:2.5]</a>, we
+have <span class="math display">\[\label{eq:3.2}
+    \begin{aligned}
+        \mathop{\mathrm{\mathsf{off}}}(B)^2 &amp;=
+\mathop{\mathrm{\mathsf{off}}}(A)^2 - 2a_{pq}^2 \\
+        &amp; \leq \mathop{\mathrm{\mathsf{off}}}(A)^2 -
+\frac{1}{N}\mathop{\mathrm{\mathsf{off}}}(A)^2 \\
+        &amp; = \left(1-{1\over N}\right)
+\mathop{\mathrm{\mathsf{off}}}(A)^2
+    \end{aligned}\]</span></p>
+<p>Denote <span class="math inline">\(A^{(k)}\)</span> as the <span
+class="math inline">\(k\)</span>th Jacobi update of <span
+class="math inline">\(A^{(0)} = A\)</span>, then we have the iterative
+bound <span class="math display">\[\label{eq:3.3}
+    \mathop{\mathrm{\mathsf{off}}}(A^{(k)})^2 \leq \left(1 -
+\frac{1}{N}\right)^k \mathop{\mathrm{\mathsf{off}}}(A^{(0)})^2\]</span>
+This implies that the classical Jacobi algorithm converges
+<strong>linearly</strong>.</p>
+<h3 id="matlab-implementation">MATLAB implementation</h3>
+<p>Before we implement the Jacobi algorithm, we need two functions (i)
+the function that calculate the Frobenius norm of the off-diagonal
+entries, (ii) the function that find the index of the maximum entry in
+modulus.</p>
+<p>(i) could be done by using the <code>diag</code> function in
+MATLAB </p>
+<pre><code>function offA = off(A)
+A = A - diag(diag(A));
+offA = norm(A,&quot;fro&quot;);
+end</code></pre>
+<p>Second line of the code will eliminate the diagonal entries, then the
+third line will give us the desire output.</p>
+<p>(ii) is more complicated. We should use <code>[~ I] = max(A)</code>
+to find the index, <code>I</code>, of the maximum entries of each
+column, then apply it again to find the index of the maximum entry in
+modulus for the entire matrix.</p>
+<pre><code>function [p,q] = maxoff(A)
+A = abs(A - diag(diag(A)));
+[val, idx1] = max(A);
+[~, q] = max(val);
+p = idx1(q);
+end</code></pre>
+<p>Making use of these two functions, we can implement the classical
+Jacobi algorithm in MATLAB . The function <code>jacobi_classical</code>
+will take two inputs (i) the symmetric matrix <span
+class="math inline">\(A^{(0)}\in\mathbf{R}^{n\times n}\)</span> and (ii)
+the tolerance <span class="math inline">\(tol\)</span>. I choose to
+output two matrices, (i) <span class="math inline">\(A\)</span> is the
+resulting matrix which is almost diagonal in the sense that <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(A) &lt; tol\cdot
+\|A^{(0)}\|_F\)</span> and (ii) <span class="math inline">\(V\)</span>
+is the orthogonal matrix such that <span class="math inline">\(V^\top
+A^{(0)} V = A\)</span>.</p>
+<p>Notice that if we would like to update <span class="math inline">\(A
+\leftarrow G^\top AG\)</span>, since <span
+class="math inline">\(A,G\in\mathbf{R}^{n\times n}\)</span>, then the
+cost would be <span class="math inline">\(\mathcal O(n^3)\)</span>
+flops. However, we could utilize Prop <a href="#prop:1.3"
+data-reference-type="ref" data-reference="prop:1.3">3</a>, namely, we
+only need to update the <span class="math inline">\(p\)</span> and <span
+class="math inline">\(q\)</span>th rows and columns of <span
+class="math inline">\(A\)</span>, and this version of update will only
+takes <span class="math inline">\(\mathcal O(n)\)</span> flops. We could
+see this in the following code</p>
+<pre><code>function [A,G] = updateA(A,p,q)
+[c,s] = jacobi_pair(A,p,q);
+% generate the orthogonal matrix G
+G = [c s; -s c];
+% update matrix A
+A([p q],:) = G&#39;*A([p q],:);
+A(:,[p q]) = A(:,[p q])*G;
+end</code></pre>
+<p>From the code above, we output both the updated <span
+class="math inline">\(A\)</span> and the orthogonal matrix <span
+class="math inline">\(G\)</span> (for usage in
+<code>jacobi_classical</code>). Line 6 require a matrix multiplication
+between <span class="math inline">\(\mathbf{R}^{2\times 2}\times
+\mathbf{R}^{2\times n}\)</span> which needs <span
+class="math inline">\(\mathcal O(n)\)</span> flops, and the same
+argument applys to line 7. Hence when updating the matrix <span
+class="math inline">\(A\)</span>, we only require <span
+class="math inline">\(\mathcal O(n)\)</span> flops. Then we could
+construct <code>jacobi_classical</code> to compute the
+eigendecomposition of <span class="math inline">\(A\)</span>.</p>
+<pre><code>function [V,A] = jacobi_classical(A,tol)
+% setup constants and initial values
+counter = 0; n = length(A);
+e = tol*norm(A,&quot;fro&quot;); 
+V = eye(n); 
+while off(A) &gt; e
+    offOld = off(A);
+    [p,q] = maxoff(A); % get the maximum entry of A
+    % update A and V
+    [A,G] = updateA(A,p,q); V(:,[p q]) = V(:,[p q])*G;
+    % check if we make any better
+    % disp(abs(offOld - off(A))); % just for testing
+    if abs(offOld - off(A)) &lt; 1e-16
+        fprintf(&#39;The Jacobi algorithm will not achieve the desire tolerence\n&#39;);
+        fprintf(&#39;The Jacobi algorithm converges in %d steps \n&#39;, counter);
+        fprintf(&#39;with error tol*(frob norm of A) = %d \n &#39;, tol*norm(A,&#39;fro&#39;));
+        return
+    end
+    counter = counter + 1; 
+end
+fprintf(&#39;The Jacobi algorithm converges in %d steps,\n&#39;, counter);
+end</code></pre>
+<p>Notice that, the Jacobi algorithm will not always converge to the
+desire tolerance since as the matrix <span
+class="math inline">\(A^{(k)}\)</span> has smaller and smaller diagonal
+entries, once <span class="math inline">\(a_{pq}^2&lt;1e-16\)</span>,
+then the computer will treat it as zero which makes <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(B) =
+\mathop{\mathrm{\mathsf{off}}}(A)\)</span> forever but the algorithm
+will not stop since the tolerance doesn’t meet. From line 13 to line 18,
+the code check if we make any progress on decreasing <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(A)\)</span> and
+this could also be done to check if <span
+class="math inline">\(a_{pq}^2\)</span> is numerical zero.</p>
+<h3 id="testing-1">Testing</h3>
+<p>We could test our code by the following routine</p>
+<pre><code>clc;clear; format long
+A = randn(5); A = A + A&#39;;
+Aini = A; tol = 1e-4;
+[V,A,~] = jacobi_classical(A,tol);
+D1 = diag(A); D1 = sort(D1);
+D2 = eig(Aini); D2 = sort(D2);
+disp(&#39;Jacobi&#39;); disp(D1&#39;);
+disp(&#39;eig&#39;); disp(D2&#39;);
+disp(&#39;difference&#39;); disp((D1-D2)&#39;);</code></pre>
+<p>Firstly, we generate a <span class="math inline">\(5\times 5\)</span>
+real symmetric matrix <span class="math inline">\(A\)</span>. Then we
+store the initial input <span class="math inline">\(A\)</span> as
+<code>Aini</code> and choose a tolerance, here I choose <span
+class="math inline">\(tol = 1e-4\)</span>. After that, we use the
+<code>jacobi_classical</code> function to generate the
+eigendecomposition of <code>Aini</code>, <span
+class="math inline">\(V^\top AV\)</span>. Finally, since the diagonal
+entries of a diagonal matrix is its eigenvalues, and eigenvalues remain
+unchanged under unitary (orthogonal) transformations, we could compare
+the difference between the diagonal entries of <span
+class="math inline">\(A\)</span> and the eigenvalues of the initial
+input <code>Aini</code> to see how good is our algorithm.</p>
+<pre><code>The Jacobi algorithm converges in 20 steps,
+Jacobi
+    -2.464236755299249  -0.711179427556464   2.007357614248050   2.853296616538683   5.511907230930849
+eig
+    -2.464236776291962  -0.711179427600783   2.007357613851296   2.853296636862083   5.511907232041235
+difference
+    1.0e-07 *
+    0.209927129013465   0.000443186598531   0.003967541850614  -0.203234007400965  -0.011103855612760</code></pre>
+<p>We could see that the difference is small such that we can only see
+the difference with <code>format long</code>. If we keep reducing the
+tolerance, after we choose <span class="math inline">\(tol =
+1e-8\)</span>, the difference is about <span
+class="math inline">\(10^{-14}\)</span> as shown below.</p>
+<pre><code>difference
+1.0e-14 *
+                0   0.044408920985006   0.005551115123126  -0.122124532708767   0.266453525910038</code></pre>
+<h2 id="the-cyclic-by-row-algorithm">The Cyclic-by-Row algorithm</h2>
+<p>The classical Jacobi method requires at each step the searching of
+<span class="math inline">\(n(n-1)\)</span> for one maximum entry in
+modulus. For <span class="math inline">\(n\)</span> is large, this can
+be extremely expensive. It will be better if we fixed a sequence of
+choice <span class="math inline">\((p,q)\)</span>, here in cyclic order
+shown in the following scheme <span class="citation"
+data-cites="cyclic_jacobi"></span></p>
+<p><span class="math display">\[\begin{aligned}
+        (p_0,q_0) &amp;= (1,2), \\
+        (p_{k+1},q_{k+1}) &amp; =
+        \begin{cases}
+            (p_k,q_{k}+1), &amp; \text{if }p_k &lt; n-1,q_k &lt; n,\\
+            (p_k+1,p_k+2), &amp; \text{if }p_k &lt; n-1, q_k = n,\\
+            (1,2),&amp; \text{if }p_k = n-1,q_k = n;
+        \end{cases}
+    \end{aligned}\]</span></p>
+<p>We keep using <span class="math inline">\((p,q)\)</span> in this
+fashion until we meet the required tolerance and this procedure can be
+described in the following algorithm</p>
+<div class="algorithm">
+<div class="algorithmic">
+<p><strong>Function</strong> <span class="math inline">\([V,A]
+=\)</span><code>jacobi_classical</code><span
+class="math inline">\((A,tol)\)</span> <span class="math inline">\(V =
+I_n, \delta = tol \cdot \|A\|_F\)</span> <span
+class="math inline">\([c,s] =\)</span><code>jacobi_pair</code><span
+class="math inline">\((A,p,q)\)</span> <span
+class="math inline">\(G^\top A G \to A\)</span> <span
+class="math inline">\(VG \to V\)</span></p>
+</div>
+</div>
+<h3 id="matlab-implementation-1">MATLAB implementation</h3>
+<p>The MATLAB code is similar to the classical Jacobi algorithm, and the
+only difference is the way of choosing <span
+class="math inline">\((p,q)\)</span></p>
+<pre><code>function [V,A,counter] = jacobi_cyclic(A,tol)
+% setup constants and initial values
+counter = 0; n = length(A);
+e = tol*norm(A,&quot;fro&quot;); 
+V = eye(n); 
+while true
+    counter = counter+1;
+    for p = 1:n-1
+        for q = p+1:n
+            counter = counter + 1;
+            [A,G] = updateA(A,p,q);
+            V(:,[p q]) = V(:,[p q])*G;
+            if off(A) &gt; e
+                continue;
+            else 
+                fprintf(&#39;The Jacobi algorithm converges in %d steps.\n&#39;,counter);
+                return
+            end
+        end
+    end
+end</code></pre>
+<h3 id="testing-2">Testing</h3>
+<p>We could compare the classical Jacobi algorithm and Cylcic-by-row
+Jacobi algorithm via the time they takes to converge. Since
+Cylcic-by-row Jacobi algorithm will be better than the classical one if
+<span class="math inline">\(n\)</span> is large, then we could use the
+following routine</p>
+<pre><code>clc;clear; format long
+N = 100; M = randn(N,N); M = M + M&#39;;
+Aini = M; tol = 1e-4; 
+e = tol*norm(Aini,&quot;fro&quot;);
+% cyclic by row jacobi 
+tic
+[~,A1] = jacobi_cyclic(Aini,tol);
+t1 = toc;
+tic 
+% classical jacobi 
+[~,A2] = jacobi_classical(Aini,tol);
+t2 = toc;</code></pre>
+<p>Our expectation should be: (i) <code>jacobi_cylcic</code> will need
+more iteration to converge, since it doesn’t always improve <span
+class="math inline">\(\mathop{\mathrm{\mathsf{off}}}(A)\)</span> in the
+most optimal way. (ii) However, we should expect the time used by
+<code>jacobi_cylcic</code> is shorter since it doesn’t require
+off-diagonal search.</p>
+<pre><code>The Jacobi algorithm converges in 132767 steps.
+The Jacobi algorithm converges in 50918 steps.
+&gt;&gt; t1,t2
+t1 =
+  34.700635292000001
+t2 =
+  41.332272416999999</code></pre>
+<p>as expected.</p>
+<p>However, from  <a href="#eq:3.3" data-reference-type="eqref"
+data-reference="eq:3.3">[eq:3.3]</a>, even we choose the optimal <span
+class="math inline">\(a_{pq}\)</span> at each time, when <span
+class="math inline">\(n\)</span> is large, the convergence rate is still
+extremely slow. This can be shown here with this output, even we only
+deal with this <span class="math inline">\(100\times 100\)</span>
+system, it requires about <span class="math inline">\(40\)</span>
+seconds to diagonalize the matrix <span
+class="math inline">\(A\)</span>. Same as the classical Jacobi
+algorithm, the cyclic-by-row is also converge linearly but since it does
+not require off-diagonal search, it is considerably faster.</p>
+<div class="remark">
+<p><strong>Remark 6</strong>. Although from the earlier derivation, the
+Jacobi algorithm converges linearly, if we consider the <span
+class="math inline">\(N = n(n-1)/2\)</span> steps as one ‘group’ or
+‘sweep’ of update, then we actually can expect <em>asymptotic</em>
+quadratic convergence <span class="citation"
+data-cites="wilkinson_note_1962"></span> where <span
+class="math display">\[A^{(k)}\leq c (A^{(0)})^2, \quad \text{for some
+}c\]</span></p>
+</div>
+</body>
+</html>
